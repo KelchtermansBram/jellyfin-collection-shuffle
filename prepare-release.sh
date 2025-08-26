@@ -32,20 +32,20 @@ cp "Jellyfin.Plugin.Template/bin/Release/net8.0/Jellyfin.Plugin.Template.dll" "$
 cp "Jellyfin.Plugin.Template/bin/Release/net8.0/Jellyfin.Plugin.Template.deps.json" "$RELEASE_DIR/"
 cp "Jellyfin.Plugin.Template/bin/Release/net8.0/Jellyfin.Plugin.Template.xml" "$RELEASE_DIR/"
 
-# Create tar.gz file
-echo "Creating release tar.gz..."
+# Create zip file
+echo "Creating release zip..."
 cd "$RELEASE_DIR"
-tar -czf "../${PLUGIN_NAME}-v${VERSION}.tar.gz" .
+zip -r "../${PLUGIN_NAME}-v${VERSION}.zip" .
 cd ..
 
 # Calculate MD5 checksum
 echo "Calculating MD5 checksum..."
-CHECKSUM=$(md5sum "${PLUGIN_NAME}-v${VERSION}.tar.gz" | cut -d' ' -f1)
+CHECKSUM=$(md5sum "${PLUGIN_NAME}-v${VERSION}.zip" | cut -d' ' -f1)
 echo "MD5 Checksum: $CHECKSUM"
 
 # Update manifest with checksum
 echo "Updating manifest with checksum..."
-sed -i "s/\"checksum\": \"\"/\"checksum\": \"$CHECKSUM\"/" manifest.json
+sed -i "s/\"checksum\": \"[^\"]*\"/\"checksum\": \"$CHECKSUM\"/" manifest.json
 
 # Create final manifest
 echo "Creating final manifest..."
@@ -54,11 +54,11 @@ cp manifest.json "${PLUGIN_NAME}-manifest.json"
 echo ""
 echo "Release preparation complete!"
 echo "Files created:"
-echo "  - ${PLUGIN_NAME}-v${VERSION}.tar.gz (plugin binary)"
+echo "  - ${PLUGIN_NAME}-v${VERSION}.zip (plugin binary)"
 echo "  - ${PLUGIN_NAME}-manifest.json (manifest with checksum)"
 echo ""
 echo "Next steps:"
-echo "1. Upload the tar.gz file to your GitHub releases or hosting service"
+echo "1. Upload the zip file to your GitHub releases or hosting service"
 echo "2. Update the sourceUrl in the manifest to point to your actual download URL"
 echo "3. Host the manifest.json file at a publicly accessible URL"
 echo "4. Add the manifest URL to Jellyfin: Dashboard → Plugins → Repositories"
