@@ -8,7 +8,7 @@
         "overview": "Intelligent collection shuffling that prevents back-to-back episodes from the same series",
         "versions": [
             {
-                "checksum": "68392c4862e8d42435c5a66c4a5a87fa",
+                "checksum": "9aea9187570e7ddb297785ba284649e9",
                 "changelog": "Initial release with basic collection shuffle functionality",
                 "targetAbi": "10.9.0.0",
                 "sourceUrl": "https://github.com/KelchtermansBram/jellyfin-collection-shuffle/releases/download/v0.1/Jellyfin.Plugin.CollectionShuffle-v1.0.0.zip",

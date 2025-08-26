@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Collection Shuffle Config Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .test-container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      .debug-info {
+        background: #f0f0f0;
+        padding: 15px;
+        margin-top: 20px;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1>Collection Shuffle Configuration Test</h1>
+      <p>
+        This page tests the configuration form outside of Jellyfin to ensure it
+        works correctly.
+      </p>
+
+      <form id="testForm">
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="EnableCollectionShuffle" />
+            Enable Collection Shuffle
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="PreventBackToBackShows" />
+            Prevent Back-to-Back Shows
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="ShuffleShowsFirst" />
+            Shuffle Shows First
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="ShuffleEpisodesSecond" />
+            Shuffle Episodes Second
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="MaxConsecutiveShowsFromSameSeries"
+            >Max Consecutive Shows:</label
+          >
+          <input
+            type="number"
+            id="MaxConsecutiveShowsFromSameSeries"
+            min="1"
+            max="10"
+            value="1"
+          />
+        </div>
+
+        <button type="submit">Test Configuration</button>
+      </form>
+
+      <div class="debug-info">
+        <strong>Test Results:</strong><br />
+        <span id="testResults">No tests run yet...</span>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("testForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const config = {
+            EnableCollectionShuffle: document.getElementById(
+              "EnableCollectionShuffle"
+            ).checked,
+            PreventBackToBackShows: document.getElementById(
+              "PreventBackToBackShows"
+            ).checked,
+            ShuffleShowsFirst:
+              document.getElementById("ShuffleShowsFirst").checked,
+            ShuffleEpisodesSecond: document.getElementById(
+              "ShuffleEpisodesSecond"
+            ).checked,
+            MaxConsecutiveShowsFromSameSeries:
+              parseInt(
+                document.getElementById("MaxConsecutiveShowsFromSameSeries")
+                  .value
+              ) || 1,
+          };
+
+          document.getElementById("testResults").textContent =
+            "Configuration captured: " + JSON.stringify(config, null, 2);
+
+          console.log("Test configuration:", config);
+        });
+    </script>
+  </body>
+</html>

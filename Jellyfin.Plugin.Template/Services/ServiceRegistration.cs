@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Jellyfin.Plugin.CollectionShuffle.Services;
 
@@ -14,5 +15,6 @@ public static class ServiceRegistration
     public static void AddCollectionShuffleServices(this IServiceCollection services)
     {
         services.AddScoped<CollectionShuffleService>();
+        services.AddHostedService<PluginHostedService>();
     }
 }

@@ -92,6 +92,15 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
       }
+      .debug-info {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 15px;
+        margin-top: 20px;
+        font-family: monospace;
+        font-size: 12px;
+      }
     </style>
   </head>
   <body>
@@ -111,7 +120,8 @@
             Enable Collection Shuffle
           </label>
           <div class="description">
-            Enable or disable the collection shuffle functionality
+            Master toggle to enable or disable the collection shuffle
+            functionality
           </div>
         </div>
 
@@ -131,7 +141,7 @@
             Shuffle Shows First
           </label>
           <div class="description">
-            Randomize the order of shows before shuffling episodes
+            Randomize the order of different series before shuffling episodes
           </div>
         </div>
 
@@ -141,7 +151,7 @@
             Shuffle Episodes Second
           </label>
           <div class="description">
-            Randomize the order of episodes within each show
+            Randomize the order of episodes within each individual series
           </div>
         </div>
 
@@ -167,12 +177,35 @@
       </form>
 
       <div id="statusMessage" class="status-message"></div>
+
+      <div class="debug-info">
+        <strong>Debug Information:</strong><br />
+        Plugin ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890<br />
+        <span id="configStatus">Loading configuration...</span><br />
+        <span id="apiStatus">Checking API availability...</span>
+      </div>
     </div>
 
     <script>
       // Configuration page logic
       document.addEventListener("DOMContentLoaded", function () {
-        loadConfiguration();
+        console.log("Collection Shuffle Configuration page loaded");
+        updateDebugInfo("Page loaded successfully");
+
+        // Check if Jellyfin API is available
+        if (typeof ApiClient !== "undefined") {
+          updateDebugInfo("Jellyfin API client available");
+          loadConfiguration();
+        } else if (typeof Dashboard !== "undefined") {
+          updateDebugInfo("Jellyfin Dashboard available");
+          loadConfigurationLegacy();
+        } else {
+          updateDebugInfo("ERROR: No Jellyfin API available");
+          showStatus(
+            "Jellyfin API not available. Please ensure you are running this in Jellyfin.",
+            "error"
+          );
+        }
 
         document
           .getElementById("configForm")
@@ -182,26 +215,68 @@
           });
       });
 
+      function updateDebugInfo(message) {
+        const debugInfo = document.getElementById("configStatus");
+        if (debugInfo) {
+          debugInfo.textContent = message;
+        }
+        console.log("Debug:", message);
+      }
+
       function loadConfiguration() {
-        // Load current configuration from Jellyfin
-        Dashboard.getPluginConfiguration(
-          "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          function (result) {
-            if (result) {
-              document.getElementById("EnableCollectionShuffle").checked =
-                result.EnableCollectionShuffle || false;
-              document.getElementById("PreventBackToBackShows").checked =
-                result.PreventBackToBackShows || false;
-              document.getElementById("ShuffleShowsFirst").checked =
-                result.ShuffleShowsFirst || false;
-              document.getElementById("ShuffleEpisodesSecond").checked =
-                result.ShuffleEpisodesSecond || false;
-              document.getElementById(
-                "MaxConsecutiveShowsFromSameSeries"
-              ).value = result.MaxConsecutiveShowsFromSameSeries || 1;
+        updateDebugInfo("Loading configuration via API client...");
+
+        if (typeof ApiClient !== "undefined") {
+          ApiClient.getPluginConfiguration(
+            "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          )
+            .then(function (result) {
+              updateDebugInfo("Configuration loaded successfully");
+              if (result) {
+                document.getElementById("EnableCollectionShuffle").checked =
+                  result.EnableCollectionShuffle || false;
+                document.getElementById("PreventBackToBackShows").checked =
+                  result.PreventBackToBackShows || false;
+                document.getElementById("ShuffleShowsFirst").checked =
+                  result.ShuffleShowsFirst || false;
+                document.getElementById("ShuffleEpisodesSecond").checked =
+                  result.ShuffleEpisodesSecond || false;
+                document.getElementById(
+                  "MaxConsecutiveShowsFromSameSeries"
+                ).value = result.MaxConsecutiveShowsFromSameSeries || 1;
+              }
+            })
+            .catch(function (error) {
+              updateDebugInfo("Error loading configuration: " + error.message);
+              console.error("Error loading configuration:", error);
+            });
+        }
+      }
+
+      function loadConfigurationLegacy() {
+        updateDebugInfo("Loading configuration via Dashboard...");
+
+        if (typeof Dashboard !== "undefined") {
+          Dashboard.getPluginConfiguration(
+            "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            function (result) {
+              updateDebugInfo("Configuration loaded via Dashboard");
+              if (result) {
+                document.getElementById("EnableCollectionShuffle").checked =
+                  result.EnableCollectionShuffle || false;
+                document.getElementById("PreventBackToBackShows").checked =
+                  result.PreventBackToBackShows || false;
+                document.getElementById("ShuffleShowsFirst").checked =
+                  result.ShuffleShowsFirst || false;
+                document.getElementById("ShuffleEpisodesSecond").checked =
+                  result.ShuffleEpisodesSecond || false;
+                document.getElementById(
+                  "MaxConsecutiveShowsFromSameSeries"
+                ).value = result.MaxConsecutiveShowsFromSameSeries || 1;
+              }
             }
-          }
-        );
+          );
+        }
       }
 
       function saveConfiguration() {
@@ -229,23 +304,69 @@
             ) || 1,
         };
 
-        Dashboard.savePluginConfiguration(
-          "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-          config,
-          function (result) {
-            saveButton.disabled = false;
-            saveButton.textContent = "Save Configuration";
+        updateDebugInfo("Saving configuration: " + JSON.stringify(config));
 
-            if (result) {
-              showStatus("Configuration saved successfully!", "success");
-            } else {
+        if (typeof ApiClient !== "undefined") {
+          // Use modern API client
+          ApiClient.updatePluginConfiguration(
+            "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            config
+          )
+            .then(function (result) {
+              saveButton.disabled = false;
+              saveButton.textContent = "Save Configuration";
+
+              if (result) {
+                updateDebugInfo(
+                  "Configuration saved successfully via API client"
+                );
+                showStatus("Configuration saved successfully!", "success");
+              } else {
+                updateDebugInfo("Failed to save configuration via API client");
+                showStatus(
+                  "Failed to save configuration. Please try again.",
+                  "error"
+                );
+              }
+            })
+            .catch(function (error) {
+              saveButton.disabled = false;
+              saveButton.textContent = "Save Configuration";
+              updateDebugInfo("Error saving configuration: " + error.message);
               showStatus(
-                "Failed to save configuration. Please try again.",
+                "Error saving configuration: " + error.message,
                 "error"
               );
+            });
+        } else if (typeof Dashboard !== "undefined") {
+          // Use legacy Dashboard
+          Dashboard.savePluginConfiguration(
+            "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            config,
+            function (result) {
+              saveButton.disabled = false;
+              saveButton.textContent = "Save Configuration";
+
+              if (result) {
+                updateDebugInfo(
+                  "Configuration saved successfully via Dashboard"
+                );
+                showStatus("Configuration saved successfully!", "success");
+              } else {
+                updateDebugInfo("Failed to save configuration via Dashboard");
+                showStatus(
+                  "Failed to save configuration. Please try again.",
+                  "error"
+                );
+              }
             }
-          }
-        );
+          );
+        } else {
+          saveButton.disabled = false;
+          saveButton.textContent = "Save Configuration";
+          updateDebugInfo("No API available for saving configuration");
+          showStatus("No API available for saving configuration", "error");
+        }
       }
 
       function showStatus(message, type) {

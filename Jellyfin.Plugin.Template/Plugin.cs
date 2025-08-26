@@ -10,7 +10,7 @@ namespace Jellyfin.Plugin.CollectionShuffle;
 /// <summary>
 /// The main plugin for collection shuffle functionality.
 /// </summary>
-public class Plugin : IPlugin
+public class Plugin : IPlugin, IHasWebPages
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
